@@ -1,0 +1,15 @@
+# Python 缓存与编译文件
+__pycache__/
+*.py[cod]
+
+# 日志
+log/
+
+# 测试脚本
+m_*
+
+# Visual Studio 项目文件
+.vs/
+*.pyproj
+*.user
+*.sln
