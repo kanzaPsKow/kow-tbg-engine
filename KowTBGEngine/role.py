@@ -91,10 +91,10 @@ class Role:
 
     def search_modifiers(self, attribute, in_tags, not_in_tags):
         """ 按照属性修饰器的 tags 对修饰器进行检索
-        attribute ->str 被检索修饰器的目标属性，若为 None 则不筛选
+        attribute ->str|None 被检索修饰器的目标属性，若为 None 则不筛选
         in_tags ->list 被检索修饰器拥有的 tags 键
         not_in_tags ->list 被检索修饰器没有的 tags 键
-        return ->list[dict] 符合索引条件的修饰器的引用
+        return ->list[role.Modifier] 符合索引条件的修饰器的引用
         """
         matched_modifiers = []
         target_attributes = []
@@ -126,7 +126,7 @@ class Modifier:
         add_value=0 ->auto 修饰的加值\n
         mul_value=1 ->int 修饰的乘值\n
         modify_type='add' ->str 修饰类型。'cor' 为在原值基础上应用加值和乘值，'sub' 为使用替换值替代原值\n
-        sub_value=None ->auto 修饰的替换值。在 modify_type 为 'sub' 时生效\n
+        sub_value=None ->Any 修饰的替换值。在 modify_type 为 'sub' 时生效\n
         """
         self.tags = tags
         self.add_value = add_value
