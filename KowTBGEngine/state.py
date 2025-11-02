@@ -5,3 +5,5 @@ class State:
         self.name = ''
         self.value_effect = []
         self.logic_effect = []
+    def affect(self):
+        pass
