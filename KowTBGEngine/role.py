@@ -1,9 +1,11 @@
-class Role:
-    def __init__(self):
-        """ 角色类
-        """
-        self.attributes = {  # 基础属性
+from . import tbg_object
+
+class Role(tbg_object.TBGObject):
+    """ 角色类 """
+    def _tbg_init(self):
+        self.attributes = {
             'id': 0,
+            'position': 0,
             'name': '',
             'hp': 0,
             'mp': 0,
@@ -12,62 +14,8 @@ class Role:
             'phy_dfn': 0,
             'mag_dfn': 0,
         }
-        self.extra_attributes = {}  # 自定义基础属性
-        self.attribute_modifiers = {}  # 属性值修饰器字典，键为属性名称，值为修饰器列表
+        self.attribute_modifiers = {}  # 属性修饰器字典
         self.states = []  # 状态列表
-
-    def set_base_attribute(self, **values):
-        """ 设置基础属性的值\n
-        values ->**dict{attribute, value} 属性键和属性值\n
-        return ->list[str] 新加入自定义属性字典的键值\n
-        """
-        no_found_keys = []
-        for k, v in values.items():
-            if k in self.attributes:
-                self.attributes[k] = v
-            else:
-                no_found_keys.append(k)
-                self.extra_attributes[k] = v
-        return no_found_keys
-
-    def get_base_attribute(self, attribute):
-        """ 获取一个属性的原始值\n
-        attribute ->str 属性键\n
-        return ->Any 指定属性的原始值，若无该属性则返回 None\n
-        """
-        if attribute in self.attributes:  # 搜寻默认存在的基础属性
-            return self.attributes[attribute]
-        elif attribute in self.extra_attributes:  # 搜寻自定义基础属性
-            return self.extra_attributes[attribute]
-        return None  # 搜寻无结果
-
-    def get_all_base_attribute(self):
-        """ 获取所有基础属性
-        return ->list[dict, dict] 默认基础属性字典和自定义基础属性字典
-        """
-        return [self.attributes, self.extra_attributes]
-
-    def get_attribute(self, attribute, sub_break=True):
-        """ 获取一个属性的计算结果\n
-        attribute ->str 属性键\n
-        sub_break=True ->bool 替换值生效后是否中断加值和乘值的计算
-        return ->Any 指定属性的计算结果，若无该属性则返回 None\n
-        """
-        base_value = self.get_base_attribute(attribute)
-        final_value = base_value
-        if final_value == None:
-            return None
-        if attribute in self.attribute_modifiers:
-            is_sub = False
-            for a in self.attribute_modifiers[attribute]:  # 优先处理替换值，后者覆盖前者
-                if a.type == 'sub':
-                    is_sub = True
-                    final_value = a.sub_value
-            if is_sub and sub_break:  # 若没有特殊要求，处理替换值后直接返回，不再处理加值和乘值
-                return final_value
-            for a in self.attribute_modifiers[attribute]:  # 处理加值和乘值
-                final_value += base_value * (a.mul_value - 1) + a.add_value
-        return final_value
 
     def add_modifier(self, tags, attribute, add_value=0, mul_value=1, modify_type='cor', sub_value=None):
         """ 添加属性修饰器\n
@@ -82,6 +30,28 @@ class Role:
             self.attribute_modifiers[attribute].append(Modifier(tags, add_value, mul_value, modify_type, sub_value))
         else:  # 若该属性不存在修饰器列表，则创建列表
             self.attribute_modifiers[attribute] = [Modifier(tags, add_value, mul_value, modify_type, sub_value)]
+
+    def get_modified_attribute(self, attribute, sub_break=True):
+        """ 获取一个属性的计算结果\n
+        attribute ->str 属性键\n
+        sub_break=True ->bool 替换值生效后是否中断加值和乘值的计算
+        return ->Any 指定属性的计算结果，若无该属性则返回 None\n
+        """
+        base_value = self.get_attribute(attribute)
+        final_value = base_value
+        if final_value == None:
+            return None
+        if attribute in self.attribute_modifiers:
+            is_sub = False
+            for a in self.attribute_modifiers[attribute]:  # 优先处理替换值，后者覆盖前者
+                if a.type == 'sub':
+                    is_sub = True
+                    final_value = a.sub_value
+            if is_sub and sub_break:  # 若没有特殊要求，处理替换值后直接返回，不再处理加值和乘值
+                return final_value
+            for a in self.attribute_modifiers[attribute]:  # 处理加值和乘值
+                final_value += base_value * (a.mul_value - 1) + a.add_value
+        return final_value
 
     def get_all_modifiers(self):
         """ 获取属性修饰器字典
